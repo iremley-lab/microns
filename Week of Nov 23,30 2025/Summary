@@ -1,0 +1,94 @@
+Notes:
+
+I struggled to classify all 5 stimuli across all rois and files so i went back to just using one files and one roi to make sure the code works first
+note that with tPCA it is instead of using time bins for feature selection
+
+
+Class Balancing for 5 Simuli------------------------------------------------------------------------------------------------------------------------------------------
+Underfitting:
+  - Happens if C is too small (strong regularization), not enough neurons/features or model is too constrained
+Overfitting:
+  - Happens if C is too large (weak regularization, too many features relative to samples, model memorizes training data
+
+New Data distribution:
+    - Cinematic: 128 samples
+    - Rendered: 128 samples
+    - Sports1m: 128 samples
+    - monet2: 40 samples
+    - trippy: 40 samples
+
+    Without balancing, models easiest strategy is always predict one of the big 3 classes and get 77% accuracy just by ignoring minority classes
+
+    Solution 1:
+    class_weight="balanced"
+      - Mathematically adjusts the loss function to penalize mistakes on minority classes more heavily
+        normal loss: error_cinematic + error_rendered + error_sports1m + error_monet2 + error_trippy
+        weighted loss : 1 * error_cinematic + 1*error_rendered + 1*error_sports1m + 3.2*error_monet2 + 3.2*error_trippy
+            3.2 = 128/40 ---> the raito of majority to minority
+      - simple, uses all training samples, does not give the model more minority examples to learn from
+
+    Solution 2:
+    Undersampling, RandomUnderSamples(random_state=42)
+      - Randomly removes samples from majority classes to match minority classes size
+      - throws away 88 samples form each majoirty class. loss of 264 samples
+      - may underfit beacuse the model doesnt see enough majorty class variation
+
+    Solution 3:
+    Oversampling, RandomOverSampler(random_state=42)
+      - Randomly duplicates samples from minority classes to match majority classes size
+      - Change from 40 samples to 128 by just duplicating random trials in those 40 original samples
+      - Creates exact duplications no new information, can lead to overfitting on minority classes
+
+
+Balanced Accuracy vs Regular Accuracy
+
+  REgular Accuracy:
+    - correct_preditions / total_preditions but this can be bad since if monet2 and trippy are never predicted correctly the model
+      can ignore those and still get a higher accuracy than it really does. 
+  Balanced Accuracy:
+    - For each class, compute the recall (true positive rate) and take the average of the recalls. It will show the accuracy 
+      included in the fact that some monet2 and trippy were never classified. 
+
+
+PCA and tPCA notes------------------------------------------------------------------------------------------------------------------------------------------
+
+PCA (Principal Component Analysis)
+  Imagine you are describing the location of houses you can use, street adress, distance from downtown, distance from target, latitude, longitude
+  elevation, distance from subway. That is seven numbers per house but many of them are redundant. PCA finds the best compressed representaiton. 
+  Maybe you only need 2-3 numbers to describe a house instead of 7. 
+
+  - Current Data:
+      Each trial looks like: [neuorn1_rate, neuron2_rate, neuorn3_rate,....] --> [0.52, 1.23, 0.01, ....]
+      Nueron1 and Neuron2 might always fire together or neuonr 4 and neuron8 might be anit correlated (one up one down) PCA discovers that there arent really
+      200 independent peices of information here the neural population actually varies along something much smaller. 
+
+  - Mathematical Process:
+      Center the data (subtract mean of each neuron)
+      Compute covariance matrix (how neurons are correclated or anti correlated)
+      Find eigenvectors (principal components) -> the "main axis" of variation captures the most variance in the data
+      Each PC is a weighted combination of all neurons that caputes the fundamental pattern of population activity
+      Project data onto PCs
+
+tPCA (temporal PCA)
+  Finds patterns across TIME within each trial
+  Input: [trials x time x neurons] --> [trials x (time*neurons)]
+  Each trial = full time seies of neural activity
+  Finds how neural acvity evolve over time
+
+Perhaps you can use both PCA and tPCA maybe tPCA on full temporal data --> 100 temporal feaures then PCA on those 100 feautres --> 30 final features
+
+
+Two Separate Experiements:
+  Mean Features + Regular PCA: extracts mean firing rate, tests with no PCA, PCA20, PCA50, PCA100
+  Temporal Features + tPCA: extracts full temporal traces (200 nueonrs x 200 timepoints = 40,000 features) always uses PCA because temporal data is too high dimensional
+      preserves temporal dynamics of nueral activity
+
+  - If tPCA has higher accuracy the brains temporal response patterns are important to distinguish different stimuli, if mean has higher accuracy then just
+    the average activity level is enough, timing doesnt matter
+
+
+Gathering Neurons:
+  - for each roiresponseseries extract mean activity for neurons during each stimulus, run anova f test to find best neurons, keep top 150 neurons
+  - pool all selected neurons from all rois builed combined feature matrix, run anova f test again on combined bool to select final 200 neurons. This can be changed to just 
+    use all 8*150 neurons if you set the selected_neurons = select_best_neurons_across_all_rois(..., n_final=999999) n_final just has to be really high or set to 200 for second anova test
+      This is stage 2 in the code, it will show 1200 neurons if all neurons used or 200 if you but a cap on it.
