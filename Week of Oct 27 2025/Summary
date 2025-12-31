@@ -1,0 +1,59 @@
+Tree structure of the dataset:
+
+14 Different Scans (sessions across 7 days)
+  - Scan 1:
+      - Muliple Imaging Planes
+            - Plane 1
+                  - ROI1 -> Nueron A (time series of activity)
+                  - ROI2 -> Neuron B
+            - Plane 2
+                  - Ton of different Neurons (ROI's)
+            - Plane 3
+            - Plane 4
+      - Visual Stimuli Shown during this scan
+            - Cinematic
+            - Sports1sm
+            - POV movement
+            - Monet2
+            - Trippy
+    - Scan 2:
+        - Different Planes (not overlapping with Scan 1)
+            - Different ROI's
+    - Scan 3:
+    - Scan 4: 
+    - ..etc
+
+RoiResponse1...10 just contain a ton of ROI's in them so you can pick 200 rois (neurons)
+- RoiResponse contains a 3D volume so it scaned multple depths (layer 2/3 or layer4) so the 200 neurons can be anywhere in 
+  a certain depth but they are from the same brain area (ie VISp)
+
+Options to scale up decoding:
+
+1. Decode across all planes (within one nwb file)
+    Loop through all RoiResponseSeries in the same NWB file to analyze different brain locations
+    Can answer which brain layer decods stimuli best, do higher visual areas show better/different decoding, how many neurons do you need from each plane
+2. Decode across multiple sessions (different nwb files)
+    Different populations of neurons were imaged in different sessions spanning different days
+    with each neuron ROI uniquely determed by session, scan index, and ROI unit ID.
+    Can answer can a decoder trained on session 1 predict stimuli in session 2?
+    Are the same neuron types/located selected across sessions?
+    Does pooling neuorns from multiple sessions improve decoding?
+
+    Potential Problems:
+      - Within one RoiResponseSeries all neurons saw the same stimulus presentations, all roireseponse
+        in the same NWB file saw the same stimuli simultaneously so you can compare across planes
+      - If you used different NWB files there are different clips
+
+
+OK TURNS OUT LAYER INFORMATION IS ON CAVE CLIENT NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO :((((( 
+Ok did some research on cave client but more problems arose sad...
+
+Roiresponseseries5 cant be mapped to cortical layers, cave coregistration tables only contain even numbered fields for some reason 2,4,6,8
+fields 1,3,5,7 never mapped I think
+
+the mapping chain requires nwb roi index -> unit_id -> pt_root_id -> layer information
+
+we have the top 200 neurons indicies and cave database with layer info (allen_v1_column_types_slanted_ref)
+We dont have ROI index -> unit_id lookup for any field
+ScanUnit.pkl file mentioned in Microns documentation its not on DANDI
+Might have to contact allen institute or like datajoint database on github
