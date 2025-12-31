@@ -1,0 +1,56 @@
+This week accuracy: 74% +- 6%
+
+I was actually doing incorrect data testing in the previous weeks with logistic regression
+
+Old approach:
+  -> z-score (uses all the data stats)
+    -> split and train data
+    -> train model
+
+New approach:
+  Training data (80% 4-folds)
+      -> Scalar.fit()
+          ->(learns mean = 50, std = 10)
+      -> Scalar.transform()
+      -> LogisticRegression.fit()
+
+  Test data(20%, 1 fold)
+      ->Scaler.transform()
+        ->(uses mean=50, std = 10)
+      ->LogisticRegression.predict()
+      ->then gives accuracy
+
+How data is being tested and split:
+  When calculating the mean before hand I used the entire dataset including test data which the model wouldve used to
+  learn about the test set distribution
+
+  pipline.fit(X_trian) only computes for each feautre 
+  standardScalar transforms X_train using those statistics
+  logisticRegression trains on the transformed training data
+
+  The test data never influences the scaler parameters
+  Original data:
+    150 trials
+    split into k=5 folds
+    fold 1-5: 30 trials
+
+    round1: train on folds 1,2,3,4 test on 5
+    round2: train on folds 1,2,3,5 test on 4
+    ...etc.
+
+    average the 5 test accuracies = final accuracy
+    used stratified so each fold has the same proportion of classes
+    shuffled=True makes sure that its shuffles
+    each fold gets its own scaler fitted on its own training data
+
+Problem with getting neuron confidence scores:
+  cave client files have different indicies than the dandi file, we would first have to find the right file that corresponds to the ROI 
+  series im using then map the indices, i tried but could not figure it out
+
+  in the mean time I just added feature selection to the neurons we are selecting instead of just selecting the first 200 neurons
+  anova f score tests:
+      deltaF/F = fluorenscnece measurement from calcium imaging
+      F-score(anova) = statistical test for feature selection 
+      
+
+    Problems: might just be using a "good" neuron but is actually just noise, dont know since we dont know the confidence rating
