@@ -1,0 +1,65 @@
+Bins
+
+  - divide each trials neural response into distinct time windows (early middle late) instead of averaging neural activity
+    across the entire stimulus. 
+  - with 250 neurons and 3 bins you get 750 features per trial
+
+
+Monet2/Trippy
+  - clip analysis has 384 trials across 3 categories (128 each) giving data for 5 fold cross validation after balancing you 
+    have 40 samples for 3 classes = 120 trials. 
+  - monet2 and trippy each only have 40 trials in a file, if i used the same neuron selection approach, not many neurons will 
+    be selected. When you try to 5 fold each fold needs at least 2 samples per class in the test set. leaving with 8 samples per fold
+    which is not enough for reliable trianing especially with 6000+ features
+  - If I class balance only to take 40 neurons from each class (200 total trials) but with 6000 plus feautres it creates overfitting
+
+Feature Structure
+
+- Start:
+    Neural recordigns: Shape -> (n_timepoints, n_eurons)
+                      Each value: fluorenscnec intensity at that time for that neuron
+- Extract single trial
+    start_indx = 5000
+    stop_inx = 8000
+    neural_data = rs.data[start_idx:stop_idx, neuron_indicies]
+- Apply smoothing
+    neural_data = gaussianfiler1d()
+- Temporal binning
+    trial_features = [
+      2.3,  # neuron_1, early bin
+      1.8,  # neuron_2, early bin
+      4.5,  # neuron_3, early bin
+      ...   # neurons 4-250, early bin
+      3.1,  # neuron_1, middle bin
+      2.9,  # neuron_2, middle bin
+      5.2,  # neuron_3, middle bin
+      ...   # neurons 4-250, middle bin
+      1.9,  # neuron_1, late bin
+      2.1,  # neuron_2, late bin
+      4.8,  # neuron_3, late bin
+      ...   # neurons 4-250, late bin
+    ]
+    # Total: 750 values
+- plane selection
+    plane1_features = [250 nuerons x 3 bins] = 750 features
+    ...for each plane
+    trial_features_all_planes = np.hstack([
+    plane1_features,  # 750 values
+    plane2_features,  # 750 values
+    plane3_features,  # 750 values
+    ...
+    plane8_features   # 750 values
+    ])
+    # Shape: (6000,) - 8 planes × 250 neurons × 3 bins
+
+Solutions to Size problems
+  - Pool across files, but then neurons arent the same across files.
+  - dimension reductoin using pca maybe, cons would have to lower neural from clips from 250 to like 50
+  - Just have two different trainers
+
+Feature Decoding Thoughts:
+  - predict continuous stimulus properties from neural activity
+  - visual motion speed
+  - luminance or contrast
+  - reconstruct actual visual stimulus (would need stimulus data shown not in nwb files)
+  - most of reconstruction id assume would need metadata not in nwb files :(
