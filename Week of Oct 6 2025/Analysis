@@ -1,0 +1,75 @@
+Test 1: Different Number of Neurons (exact clip duration, mean)
+  10 neurons: 54%
+  50 nuerons: 57%
+  100 neurons: 63%
+  200 neurons: 57%
+  500 neurons: 46%
+
+  More neurons doesnt always help and actually hurts performance, mainly due to dimensionality maybe with 384 trials we
+  dont have enought data to train with 1000 feautres, the model starts to overfitt to noise. we need to get more data or use
+  regularization or dimensionality reduction if we want to use more neurons. 
+
+Test 2: Different time windows (100 neurons, mean activity, fixed windows)
+  2 seconds: 44%
+  5 seconds: 52%
+  10 seconds: 57%
+
+  longer windows give better performance, makes sense becuase more data to average over means less noise and more stable estimates
+  longer windows also include more irrelevant activity after like the main neurons fired or smth. 
+
+Test 3: Single Neuron vs Population (exact clip duration, mean activity)
+  compared neuron 4 alone vs all 1455 neurons 
+  neuron 4:  
+    overall: 46%
+    cinematic: 33%
+    rendered 34%
+    sports1m: 70%
+
+  population:
+    overall: 59%
+    cinematic: 48%
+    rendered: 73%
+    sports1m: 59%
+
+  neuron 4 is actually pretty good on its own especially for sports1m maybe this neuron likes something about sports its a sports fan
+  but it doesnt do well with cinematic and rendered. population is more balanced along all three categories. Worse in sports tho. 
+
+Test 4: Max vs Mean (100 neurons, exact clip duration)
+
+  mean activity: 57%
+  max activity: 45%
+
+  mean is way better, max is more sensitive to outliers and noise. Could try other features like variance. 
+
+
+Test 5: Fixed 5s window vs Exact clip duration (100 neurons, mean activity)
+
+  fixed: 51%
+  exact: 57%
+
+  using exact clip duration is better, makes sense becuase clips are different lengths. 
+
+Test 6: Neuron 4 fixed vs exact (single neuron, mean activity)
+
+  fixed: 31%
+  exact duration: 46%
+
+  so perhaps exact time windows is the way to go ok good to know. Neuron 4 might have dynamics like how the neuron ramps up 
+  that matter especially in sports since it did really well there. 
+
+
+Conclusion: 
+
+  Best Performance: 63% with 100 neurons, exact duration, mean activity. 
+  More neurons help but only up to a point (dimensionality)
+  longer time window helps but exact window seems better
+  mean activity better than max
+  population beats single neuron but not by much but then again only test neuron 4
+  neuron 4 likes sports
+
+  77 test trials is small 
+  averaging over time gets rid of how the neuron ramps up to stimulus
+
+  Can try: like a logistic regression to handle high dimensions which is something that struggled here
+            k fold cross validation: split into 5 folds and rotate which is test set, better than standard 80/20
+            try a nonlinear model maybe like svm.
