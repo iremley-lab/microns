@@ -1,0 +1,52 @@
+Current Approach:
+
+Computing temporal derivatives (rate of change) of neural activity
+Apply PCA to these derivatives across neurons
+Extracting rich statistical features (mean, std, FFT) from each PC timecourse
+Training a logistic regression classifer on these features
+
+Pros:
+- Temporal dynamics captured
+- Dimensionality reduction
+- Rich feature set
+- Balanced class handeling
+
+Cons:
+- Low Variance Explained (27%): most information is in high frequency noise or single neuron idiosyncrasies, are derivatives the right choice?
+- Bad classification on naturalistic videos
+
+Missing:
+- trial to trial variability
+- neuron selectivity
+- spatial patterns
+- timing precision
+
+
+New Ideas:
+
+Trial to Trial Variability
+  Noise Reduction via Averaging:
+    - signal averages up, noise averages out
+    - if you average the neural response across all 128 presentations of cimematic
+    - true stimulus driven activity (the signal) will be consisten across trials and survive averaging
+    - random noise will cancel out because its uncorrelated across trials
+
+  Could compute:
+    - Mean response across trials
+    - Std of response across trials
+    - only use neurons with high signal to noise ratio. 
+
+    - Noise correlations between neurons
+        How does trial to trial variability in neuron A relate to variability in neuron B?
+        AFter removing the stimulus driven mean response, do neurons fluctuate together?
+
+
+Trying something new:
+
+1. Trial Averaged Response Profiles 
+    - Average neural response across all respeated presentations
+    - Gives you 5 template responses [time x neurons] for each stimulus
+    - High signal to noise rate ground truth patterns
+    - removes trial to trial noise, reveals the reliable stimulus driven signal
+
+I tried doing PCA but I got very low variance so maybe it isnt the best approach. 
