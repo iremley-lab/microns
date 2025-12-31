@@ -1,0 +1,11 @@
+What I Did This Week:
+- Accessed the MICrONS Dataset (DANDISET 000402) and set up connection to stream data from DANDI Archive
+- Created data structure notebook because I had trouble understanding what visual stimuli were in the dataset 
+  and how everything was organized. This notebook prints out the complete data structure including all imaging planes, 
+  number of neurons recorded, detailed stimulus information with types and timing, and session metadata. There is still other
+  information but this helped. 
+- Ploted hows fluorescence traces from 10 neurons with stimulus presentation timing overlaid as color-coded blocks. This lets me 
+  see neural activity during different visual stimulus conditions and identify which neurons respond to which stimuli.
+
+
+Challenges: Initial confusion about dataset structure and stimulus categories. Needed to create the explorer notebook first to understand what I was looking at.
