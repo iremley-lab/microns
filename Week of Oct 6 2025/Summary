@@ -1,0 +1,121 @@
+trying to decode what visual stim the mouse sees from neural activity 
+stimuli = natural movies, monet, trippy
+
+first decoding just by broad catagories (nautral vs monet vs trippy)
+then possibly like different variants (monet1, monet2)
+
+first just trying mean activity
+next week we could try peak, variance, temporal patterns, cross validation or smth idk
+
+-----------------------------------------------------
+Notes on LDA: 
+-----------------------------------------------------
+linear discriminat analysis: finda linear combinations of neurons that best separate classes (stimulus)
+doesn't need lots of parameters so less likely to overfit
+
+say we have 100 neurons and 3 conditions, lda finds the best way to project 100 dimensions down to 2 dimensions
+(num_classes - 1) that maximizes separation between conditions. It does this by maximizing between-class variance / within-class variance
+
+between-class: how far aparat are the condition means
+within-class: how much do trials of same condition vary
+
+if monet trials all cluster tight but far form natural trials, it is easy to separate
+for new data points it sees which side of boundaries it falls on
+
+for this week we are only looking at neuron 4 from roiresponse3 because idk i like four yay
+
+-----------------------------------------------------
+LDA Class:
+-----------------------------------------------------
+
+train_test_split(X, y, test_size = 0.2, stratify - y)
+  x = our data (trials x neurons), y = labels (0, 1, 2, for conditions)
+  test_size = 0.2 means 20% for testing
+  stratify = y means keep same proportion of each condition in train and test
+  returns X_train, X_test, y_train, y_test
+
+LinearDiscriminantAnalysis()
+  creates the model object
+  lda.fit(X_train, y_train) = trains it on training data
+  lda.predict(X_test) = predicts labels for test data
+  lda.coef_ = the weights showing which neurons are important
+
+classification_report(y_test, y_pred)
+  shows precision, recall, f1 score for each condition
+  precision = of the trials we predicted as monet, how many actually were monet
+  recall = of all the actual monet trials, how any did we catch
+  f1 = harmonic mean of precision and recall
+
+-----------------------------------------------------
+Decoding Thoughts:
+-----------------------------------------------------
+In future weeks we could try logistic regresison with L2 regularization, random forest to see if no nlinear interactions help
+Neural nets dont have enough data so probly not this. 
+
+How to decided which is best: test accuracy on held out data, look at confusion matrices to see what conditions get mixed up
+check if it generalizes, computational cost too ig
+
+Why linear might be enough: we are already averaging over time, stimulus categores are pretty different, 
+non linear might just fit noise
+
+Averaging acitivity acorss entire stimulus window: each clip is like 5-10sec we take all the neural activity during that
+window, average it to get one number per neuron per trial. Reduces nose by averaging, gives us one clear feature vector per trial,
+cons that it throws away temporal information, might miss important acivity like oscillating or smth, if conditions differ in timing not magnitude 
+we will miss it.
+
+Looking at specific time points: pick specific moments like stimulus onset, peack response, offset, or take
+activity at every timepoint separately, each trial becomes multiple feature vectors. Pros: keeps temporal information
+can see if neurons respond early or late. Cons: way more features, need more data to avoid overfitting. 
+
+Trial averaging: say monet1 is shown 5 times, average the neural responses across those 5 presentations, now we have 1 averaged trial
+for monet1 instead of 5 noisy trials. Pros: reduce trial to trial like variability the difference in it, less noise in data. Cons:
+way fewer training samples, assumes all presentations are identical.
+
+Time moment decoding: dont average over time, train separate decoder for each timepoint, at 100ms after stimulus, can we decode what mice see,
+at 500ms after stimulus can we decode what they see etc. Pros: see when information emerges in the population, can track how representation
+changes over time, can understand the dynamic like oscillation or ramp up of a neuron. Cons: need to train like many decoders.
+
+Thoughts: start with averaging, try time moment decoding, try different time windows (after first couple of seconds or peak response times), 
+propbably not trial by averaging since we dont have many repeats and losing samples. 
+
+What we are questioning: does the information we care about live in the magnitude of response (avearaged activity) or the
+pattern over time (dynamics) for distinguishing big catecories like from naturla vs monet the magnitude is probably enough but for
+distinguishing specific clips might need dynamic approach. 
+
+What decoding depends on: if stimuli are really different lengths averaging could be hard since you are comparing a 3 second clip to
+10 second clip, current approach uses fixed windows size to help, but maybe initial repsonse is more important and the rest is just sustained activity
+
+What to check in the future: how variable is stimulus duration, do responses adapt over time (get weaker). Sliding time frame (decode from 0 -2, 1-3, 2-4), 
+early vs late (first half vs second half of stimulus), peak response (just the max)
+
+-----------------------------------------------------
+Hyperparameters:
+-----------------------------------------------------
+hyperparameters: settings you make before training that affect how the model learns not learned from data
+
+  Ex: how many neurons to use, what time window to use, train/test split ratio
+
+For lda specifically: 
+
+Solver: svd, lsqr, eigen, if you have more feautres than samples use lsqr or eigen but we have way more samples
+than features so svd is being used. 
+
+Shrinkage: regularizaiton to prevent overfitting, options: none, auto, num between 0 and 1. Shrinks covariance matrix 
+toward diagnol to make it more stable. When to use: if you have high dimensional data or class covariances. It might help
+since if using tons of neurons try auto if overfitting
+
+Num of Nuerons: how many neurons to include in analysis, rn we use 100. more neurons = more info but also more noise and slower
+computation, can try 10, 25, 100, 200 to see what gives best test accuracy
+
+Time Window Size: how much neural activity to anayze per trial, rn we use 5 seconds. Longer means more data but might include irrelevant activty
+shorter = less noise but might miss slow responses, can try 2s 5s 10s or full stimulus duration
+
+
+-----------------------------------------------------
+Input Setup in Code:
+-----------------------------------------------------
+data matrix X: (384 trials, 1455 neurons)
+
+80/20 split happens on the rows (trials) and not the columns
+training set: 307 x 1455
+test set: 77 x 1455
