@@ -1,0 +1,58 @@
+Trying to decied what neurons to use:
+
+  We want to use neurons of interest, I couldn't find any confidence scores per say on the nwb file
+  avliable metrics that I found: image_mask -> spatial footprint of each neuron (ROI shape) and mask_type -> type of mask used
+
+  Annotations in CAVE database annoation tables not NWB files on DANDI
+
+Logistic Regression Hyperparameters:
+
+C (Regularization Strength)
+Default: 1.0
+Range: Positive float (e.g., 0.001 to 100)
+What it does: Controls how much to penalize large weights
+Smaller C = stronger regularization = simpler model = may underfit
+Larger C = weaker regularization = more complex model = may overfit
+Try: 0.01, 0.1, 1.0, 10, 100
+
+penalty (Regularization Type)
+Default: 'l2'
+Options: 'l1', 'l2', 'elasticnet', 'none'
+What it does: Type of regularization applied to weights
+'l2': Ridge regularization, shrinks all weights proportionally
+'l1': Lasso regularization, can set some weights to exactly zero (feature selection)
+'elasticnet': Mix of l1 and l2
+'none': No regularization
+Note: Not all solvers support all penalties
+
+solver (Optimization Algorithm)
+Default: 'lbfgs'
+Options: 'lbfgs', 'liblinear', 'saga', 'newton-cg', 'sag'
+What it does: Algorithm used to find optimal weights
+'lbfgs': Good for small datasets, handles multiclass well, supports l2 and none
+'liblinear': Good for small datasets, supports l1 and l2, binary/one-vs-rest only
+'saga': Good for large datasets, supports all penalties including elasticnet
+'newton-cg': Similar to lbfgs, supports l2 and none
+'sag': Faster variant of saga but no l1 support
+Common combinations:
+l2 penalty -> lbfgs or newton-cg
+l1 penalty -> liblinear or saga
+elasticnet -> saga
+
+class_weight (Class Balancing)
+Default: None
+Options: None, 'balanced', or dict
+What it does: Adjusts for imbalanced classes
+None: All classes weighted equally
+'balanced': Automatically adjusts weights inversely proportional to class frequencies
+dict: Manually specify weight for each class (e.g., {0: 1, 1: 2, 2: 1})
+Use 'balanced' when: You have unequal class sizes and want to prevent bias toward majority class
+
+max_iter (Maximum Iterations)
+Default: 100 (but we use 1000)
+Range: Positive integer
+What it does: Maximum number of iterations for the solver to converge
+Too low: May not converge, gives warning
+Too high: Takes longer but ensures convergence
+Typical range: 100 to 10000
+If you get convergence warnings, increase this value
