@@ -1,0 +1,39 @@
+Neurons were pre-selected by the MICrONS pipeline and identified via unit IDs in 
+the session metadata. After aligning metadata to the NWB fluorescence matrix 
+(unit IDs are 1-indexed so we subtract 1 to index into the columns of the 
+fluorescence array), each neuron belongs to a brain area and depth bin. 
+
+A boolean mask is constructed for each group — for example, all neurons where 
+`brain_area == 'V1'` — selecting the corresponding columns of the trial × neuron 
+feature matrix. This masked submatrix is then passed to the decoder.
+
+To ensure fair comparisons across groups, all groups are subsampled to a fixed 
+global floor — the 25th percentile of the minimum neuron count per group across 
+all sessions — with a hard minimum of 20. Groups falling below the floor in a 
+given session are skipped entirely rather than decoded with insufficient data.
+
+For each trial, the mean fluorescence across all frames within the stimulus window 
+was computed per neuron, yielding a single feature vector (1 × n_neurons) per trial. 
+Frame times from the NWB timestamps were used to mask only frames falling within 
+`[trial_start, trial_stop)`. This produces a trials × neurons matrix per session
+
+A soft-voting ensemble of Logistic Regression and a linear kernel SVM was used, 
+both with balanced class weights to account for any trial imbalance across the 
+three movie categories.
+
+For each of 10 bootstraps:
+1. A random seed is set so subsampling is reproducible but varied across bootstraps
+2. The masked neuron population is randomly subsampled without replacement to the floor N
+3. Features are z-scored (StandardScaler fit on the full trial set)
+4. 5-fold stratified cross-validation is run — stratified to ensure each fold 
+   contains proportional representation of all three movie classes
+5. In each fold, both classifiers independently produce class probabilities; 
+   these are averaged (soft vote) and the highest probability class is the prediction
+6. A second run with shuffled labels is performed identically to estimate chance, 
+   confirming that accuracy reflects stimulus-driven signal and not classifier bias
+7. The normalized confusion matrix (rows = true class, normalized so each row sums 
+   to 1) is computed from cross_val_predict, giving per-class recall on the diagonal
+
+Final reported accuracy, shuffle accuracy, std, and per-class recall are all 
+averaged across the 10 bootstraps. Averaging over bootstraps accounts for variance 
+introduced by the random neuron subsampling.
