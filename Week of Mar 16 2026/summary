@@ -1,0 +1,51 @@
+Working on project B, using EM data along with area and depth, I thought that might be helpful before starting reconstruction.
+Have concerns with how much data is actually mapped out, ran a script to check data in metadata.pkl, output:
+
+=== Cell type counts (all sessions) ===
+cell_type
+23P          9023
+4P           5888
+5P-IT        2318
+5P-ET         955
+6P-IT         474
+6P-CT         220
+BC            175
+MC            158
+NGC           137
+pericyte      115
+5P-NP          69
+astrocyte      37
+BPC            26
+OPC            17
+microglia      15
+oligo          12
+
+Total units: 156239
+Units with cell_type: 19639 (12.6%)
+
+=== Per session: min neurons per cell type ===
+s4_scan7: {'23P': np.int64(630), '4P': np.int64(417), '5P-ET': np.int64(110), '5P-IT': np.int64(83), 'MC': np.int64(14), '5P-NP': np.int64(6), 'astrocyte': np.int64(2), 'NGC': np.int64(1), 'BPC': np.int64(1), 'OPC': np.int64(1), '6P-CT': np.int64(1)} | min=1, n_types=11
+s4_scan9: {} | min=<NA>, n_types=0
+s4_scan10: {} | min=<NA>, n_types=0
+s5_scan3: {'23P': np.int64(126), '5P-ET': np.int64(101), '4P': np.int64(70), '5P-IT': np.int64(65), '6P-IT': np.int64(24), '6P-CT': np.int64(17), 'MC': np.int64(9), '5P-NP': np.int64(1)} | min=1, n_types=8
+s5_scan6: {'4P': np.int64(503), '23P': np.int64(354), '5P-IT': np.int64(251), '6P-IT': np.int64(101), '5P-ET': np.int64(97), '6P-CT': np.int64(69), 'BC': np.int64(29), 'NGC': np.int64(22), 'pericyte': np.int64(19), 'MC': np.int64(18), '5P-NP': np.int64(7), 'BPC': np.int64(6), 'astrocyte': np.int64(4), 'oligo': np.int64(2), 'OPC': np.int64(1), 'microglia': np.int64(1)} | min=1, n_types=16
+s5_scan7: {'4P': np.int64(506), '23P': np.int64(380), '5P-IT': np.int64(216), '6P-IT': np.int64(89), '5P-ET': np.int64(55), '6P-CT': np.int64(39), '5P-NP': np.int64(4), 'MC': np.int64(3), 'BPC': np.int64(2), 'OPC': np.int64(1), 'NGC': np.int64(1), 'astrocyte': np.int64(1)} | min=1, n_types=12
+s6_scan2: {'4P': np.int64(482), '23P': np.int64(456), '5P-IT': np.int64(252), '6P-IT': np.int64(62), '5P-ET': np.int64(26), '6P-CT': np.int64(23), '5P-NP': np.int64(9), 'MC': np.int64(5), 'BPC': np.int64(3), 'microglia': np.int64(1), 'OPC': np.int64(1)} | min=1, n_types=11
+s6_scan4: {'23P': np.int64(763), '5P-IT': np.int64(371), '4P': np.int64(272), '6P-IT': np.int64(79), '5P-ET': np.int64(39), 'BC': np.int64(29), '6P-CT': np.int64(26), 'NGC': np.int64(22), 'pericyte': np.int64(19), 'MC': np.int64(15), '5P-NP': np.int64(5), 'BPC': np.int64(4), 'astrocyte': np.int64(4), 'oligo': np.int64(2), 'OPC': np.int64(2)} | min=2, n_types=15
+s6_scan6: {'23P': np.int64(775), '5P-IT': np.int64(329), '4P': np.int64(134), '5P-ET': np.int64(42), '6P-IT': np.int64(35), '6P-CT': np.int64(16), 'MC': np.int64(7), '5P-NP': np.int64(4), 'OPC': np.int64(2), 'microglia': np.int64(1)} | min=1, n_types=10
+s6_scan7: {'23P': np.int64(787), '5P-IT': np.int64(344), '4P': np.int64(240), '5P-ET': np.int64(73), '6P-IT': np.int64(42), 'BC': np.int64(30), 'NGC': np.int64(22), 'MC': np.int64(20), 'pericyte': np.int64(19), '6P-CT': np.int64(17), '5P-NP': np.int64(6), 'astrocyte': np.int64(3), 'BPC': np.int64(2), 'oligo': np.int64(2), 'OPC': np.int64(1)} | min=1, n_types=15
+s7_scan3: {'23P': np.int64(427), '4P': np.int64(378), '5P-IT': np.int64(178), '5P-ET': np.int64(128), 'BC': np.int64(29), 'NGC': np.int64(22), 'pericyte': np.int64(19), 'MC': np.int64(18), '6P-IT': np.int64(14), '5P-NP': np.int64(6), '6P-CT': np.int64(4), 'astrocyte': np.int64(3), 'BPC': np.int64(2), 'oligo': np.int64(2), 'OPC': np.int64(1)} | min=1, n_types=15
+s7_scan4: {'23P': np.int64(775), '4P': np.int64(517), '5P-ET': np.int64(144), '5P-IT': np.int64(80), 'BC': np.int64(29), 'MC': np.int64(24), 'NGC': np.int64(22), 'pericyte': np.int64(20), '6P-IT': np.int64(14), 'astrocyte': np.int64(7), '5P-NP': np.int64(7), 'BPC': np.int64(4), '6P-CT': np.int64(4), 'microglia': np.int64(2), 'oligo': np.int64(2), 'OPC': np.int64(1)} | min=1, n_types=16
+s7_scan5: {'23P': np.int64(567), '4P': np.int64(269), '5P-ET': np.int64(48), '5P-IT': np.int64(42), 'BC': np.int64(29), 'NGC': np.int64(23), 'pericyte': np.int64(19), 'MC': np.int64(15), '6P-IT': np.int64(14), '5P-NP': np.int64(7), 'astrocyte': np.int64(4), '6P-CT': np.int64(4), 'microglia': np.int64(2), 'BPC': np.int64(2), 'oligo': np.int64(2), 'OPC': np.int64(1)} | min=1, n_types=16
+s8_scan5: {'23P': np.int64(895), '4P': np.int64(462), '5P-IT': np.int64(107), '5P-ET': np.int64(91), 'MC': np.int64(10), '5P-NP': np.int64(7), 'astrocyte': np.int64(5), 'microglia': np.int64(3), 'OPC': np.int64(1), 'NGC': np.int64(1)} | min=1, n_types=10
+s8_scan7: {'23P': np.int64(3)} | min=3, n_types=1
+s8_scan9: {} | min=<NA>, n_types=0
+s9_scan3: {'4P': np.int64(1637), '23P': np.int64(5), 'microglia': np.int64(2), 'OPC': np.int64(2), '5P-ET': np.int64(1), 'astrocyte': np.int64(1)} | min=1, n_types=6
+s9_scan4: {'23P': np.int64(1352), 'microglia': np.int64(3), 'OPC': np.int64(1), '4P': np.int64(1), 'astrocyte': np.int64(1), 'NGC': np.int64(1)} | min=1, n_types=6
+s9_scan6: {'23P': np.int64(728), 'astrocyte': np.int64(2), 'OPC': np.int64(1)} | min=1, n_types=3
+
+
+three sessions no data, two have very minimal data. MC, pericyte, astrocyte, BPC, OPC, microglia, oligo, 5P-NP, 6P-CT all have very little data 
+I think it is ok to only decode 4 main excitory types, 23P, 4P, 5P-IT, 5P-ET
+
+same decoder, just added cell type as a feature.
