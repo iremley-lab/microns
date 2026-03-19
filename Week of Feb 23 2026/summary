@@ -1,0 +1,42 @@
+# The outer loop runs n_bootstrap=20 times. Each iteration randomly subsamples
+# n_neurons=50 neurons from the population. This is critical when comparing
+# across areas or depths that have different numbers of neurons - for example
+# V1 has 5315 neurons and AL has 387. Without subsampling, V1 would always win
+# just because it has more neurons. By always using 50 neurons we make fair
+# comparisons. Running 20 iterations and averaging smooths out the randomness
+# of which 50 neurons got picked.
+
+# Inside each bootstrap we use 5-fold stratified cross validation. The 384 trials
+# are split into 5 equal folds of ~77 trials each, with equal class proportions
+# in each fold. In each fold the model trains on 4 folds (307 trials) and tests
+# on the held out fold (77 trials). This repeats 5 times so every trial gets
+# tested exactly once. We never test on data the model was trained on, which
+# gives us an honest estimate of how well the decoder generalizes.
+
+# Inside each fold we run a two-step pipeline:
+# Step 1 - StandardScaler: normalizes each neuron's activity to have mean=0
+# and std=1 across trials. This is important because different neurons have
+# very different firing rates and without scaling high-firing neurons would
+# dominate the decoder just because of their magnitude.
+# Step 2 - LogisticRegression: learns weights for each of the 50 neurons.
+# C=0.01 is strong regularization which penalizes large weights. This is
+# important because we have more neurons (50) than we might expect given only
+# 307 training trials, so regularization prevents overfitting.
+# solver='saga' and multi_class='multinomial' means it solves the full 3-class
+# problem jointly rather than doing one-vs-rest binary comparisons.
+
+# Before the cross validation loop we create a shuffled version of the labels
+# by randomly permuting y. We then run the exact same decoder on the shuffled
+# labels. Because the labels no longer match the activity the decoder cannot
+# learn anything real. The shuffle accuracy should land right at chance (0.333
+# for 3 classes). If it does, we know our real accuracy is genuine and not
+# an artifact of some statistical quirk. If shuffle is above chance something
+# is wrong with our procedure.
+
+# acc: mean accuracy across all bootstraps and folds (real)
+# acc_std: standard deviation across bootstraps (how stable the estimate is)
+# acc_shuf: mean accuracy with shuffled labels (should be ~0.333)
+# acc_shuf_std: std of shuffle accuracy
+# cm: mean normalized confusion matrix across bootstraps (real)
+# cm_shuf: mean normalized confusion matrix for shuffle control
+# classes: the class labels in the order used by the confusion matrix
